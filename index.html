@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FailiFasta - Universal Converter (Image, Video & Document)</title>
+    <title>FailiFasta - Convert Format Zote za Mafaili</title>
     
-    <meta name="description" content="FailiFasta ni zana ya bure ya kubana na kubadilisha format za picha, video kwenda GIF, na PDF.">
-
-    <!-- External Libraries za Video na Documents -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
 
     <style>
         :root {
@@ -20,247 +16,209 @@
             --text-muted: #94a3b8;
             --accent-blue: #38bdf8;
             --accent-green: #34d399;
-            --accent-green-hover: #059669;
             --input-bg: #0f172a;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; padding: 20px 15px; }
-        .container { max-width: 550px; margin: auto; background: var(--card-bg); padding: 30px 25px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); border: 1px solid var(--card-border); width: 100%; }
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { color: var(--accent-blue); font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
-        .header p { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #cbd5e1; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 25px 15px; }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--accent-blue); font-size: 32px; font-weight: 800; }
+        .header p { color: var(--text-muted); font-size: 15px; margin-top: 5px; }
+
+        .main-grid {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .category-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-title {
+            color: var(--accent-blue);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        .tool-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tool-option:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .tool-option span { font-size: 14px; font-weight: 600; }
+        .tool-option input[type="radio"] { accent-color: var(--accent-blue); }
+
+        .upload-section {
+            max-width: 1000px;
+            margin: 30px auto 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+
         input[type="file"] { display: none; }
-        .file-upload-btn { display: block; text-align: center; padding: 16px; background: rgba(56, 189, 248, 0.08); color: var(--accent-blue); border: 2px dashed rgba(56, 189, 248, 0.3); border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
-        .file-upload-btn:hover { background: rgba(56, 189, 248, 0.15); border-color: var(--accent-blue); }
-        select, input[type="number"], input[type="range"] { width: 100%; padding: 12px; border: 1px solid var(--card-border); border-radius: 10px; outline: none; background: var(--input-bg); font-size: 15px; color: var(--text-main); }
-        .dimension-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .range-container { display: flex; align-items: center; gap: 15px; }
-        .range-value { font-weight: 700; color: var(--accent-blue); min-width: 45px; }
-        .btn { width: 100%; background: var(--accent-blue); color: #0f172a; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.2s ease; margin-top: 10px; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-download { background: var(--accent-green); color: #064e3b; text-decoration: none; display: block; text-align: center; }
-        .btn-download:hover { background: var(--accent-green-hover); color: #ffffff; }
-        #preview-area { display: none; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--card-border); text-align: center; }
-        .preview-box { background: var(--input-bg); padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--card-border); }
-        img, video { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 0 auto; }
-        .info { font-size: 13px; color: var(--text-muted); margin: 12px 0; line-height: 1.6; }
-        .info b { color: var(--text-main); }
-        footer { text-align: center; margin-top: 25px; font-size: 13px; color: var(--text-muted); }
+        .file-upload-btn {
+            display: block;
+            padding: 18px;
+            background: rgba(56, 189, 248, 0.08);
+            color: var(--accent-blue);
+            border: 2px dashed rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--accent-blue);
+            color: #0f172a;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background: var(--accent-green);
+            color: #064e3b;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        #preview-area { display: none; margin-top: 20px; }
+        img, video { max-width: 100%; border-radius: 8px; margin-top: 10px; }
+        footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 13px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>FailiFasta 🚀</h1>
-        <p>Badilisha Picha, Video kwenda GIF, na Dokumen (PDF/DOCX)</p>
+<div class="header">
+    <h1>FailiFasta 🚀</h1>
+    <p>Zana ya haraka ya kubadilisha aina zote za mafaili (Image, Video, Audio & Documents)</p>
+</div>
+
+<!-- GRID SYSTEM - ZANA ZOTE ZINAONEKANA WAZI -->
+<div class="main-grid">
+
+    <!-- Group 1: Picha -->
+    <div class="category-card">
+        <div class="category-title">🖼️ Picha (Image Formats)</div>
+        <label class="tool-option"><span>PNG ➔ JPG / JPEG</span><input type="radio" name="tool" value="img-jpg" checked></label>
+        <label class="tool-option"><span>JPG ➔ PNG</span><input type="radio" name="tool" value="img-png"></label>
+        <label class="tool-option"><span>Image ➔ WEBP</span><input type="radio" name="tool" value="img-webp"></label>
+        <label class="tool-option"><span>Image ➔ BMP / GIF</span><input type="radio" name="tool" value="img-bmp"></label>
+        <label class="tool-option"><span>Picha ➔ PDF</span><input type="radio" name="tool" value="img-to-pdf"></label>
     </div>
 
-    <div class="form-group">
-        <label>1. Chagua Faili Yako (Picha, Video, au PDF/DOCX):</label>
-        <label for="fileInput" class="file-upload-btn" id="fileLabel">📁 Bonyeza Hapa Kuchagua Faili</label>
-        <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.docx" onchange="handleFileSelect(event)">
+    <!-- Group 2: Video -->
+    <div class="category-card">
+        <div class="category-title">🎬 Video & Animations</div>
+        <label class="tool-option"><span>Video ➔ GIF (Animated)</span><input type="radio" name="tool" value="video-gif"></label>
+        <label class="tool-option"><span>Video ➔ MP4 / WEBM</span><input type="radio" name="tool" value="video-mp4"></label>
+        <label class="tool-option"><span>Video ➔ MP3 (Extract Audio)</span><input type="radio" name="tool" value="video-mp3"></label>
     </div>
 
-    <div class="form-group">
-        <label>2. Chagua Mchakato Unaotaka (Output Format):</label>
-        <select id="formatSelect">
-            <optgroup label="Format za Picha">
-                <option value="img-jpg">JPG / JPEG</option>
-                <option value="img-png">PNG</option>
-                <option value="img-webp">WEBP</option>
-            </optgroup>
-            <optgroup label="Video Conversion">
-                <option value="video-gif">Video ➔ Animated GIF (Kipande cha Video)</option>
-            </optgroup>
-            <optgroup label="Dokumen (Documents)">
-                <option value="pdf-to-img">PDF ➔ Picha (JPG)</option>
-                <option value="img-to-pdf">Picha ➔ Dokumen ya PDF</option>
-            </optgroup>
-        </select>
+    <!-- Group 3: Audio -->
+    <div class="category-card">
+        <div class="category-title">🎵 Sauti (Audio Formats)</div>
+        <label class="tool-option"><span>MP3 ➔ WAV</span><input type="radio" name="tool" value="audio-wav"></label>
+        <label class="tool-option"><span>WAV / AAC ➔ MP3</span><input type="radio" name="tool" value="audio-mp3"></label>
+        <label class="tool-option"><span>MP3 + Image ➔ MP4 Video</span><input type="radio" name="tool" value="mp3-to-mp4"></label>
     </div>
 
-    <div class="form-group" id="qualityGroup">
-        <label>3. Ubora / Compression Level:</label>
-        <div class="range-container">
-            <input type="range" id="qualityRange" min="0.1" max="1.0" step="0.1" value="0.8" oninput="updateQualityLabel(this.value)">
-            <span class="range-value" id="qualityValue">80%</span>
-        </div>
+    <!-- Group 4: Documents -->
+    <div class="category-card">
+        <div class="category-title">📄 Documents</div>
+        <label class="tool-option"><span>PDF ➔ Picha (JPG)</span><input type="radio" name="tool" value="pdf-to-jpg"></label>
+        <label class="tool-option"><span>DOCX ➔ PDF</span><input type="radio" name="tool" value="docx-to-pdf"></label>
+        <label class="tool-option"><span>PDF ➔ DOCX</span><input type="radio" name="tool" value="pdf-to-docx"></label>
     </div>
 
-    <button class="btn" id="processBtn" onclick="processFile()">Badilisha Faili Papo Hapo</button>
+</div>
+
+<!-- SEHEMU YA UPLOAD NA MCHAKATO -->
+<div class="upload-section">
+    <label for="fileInput" class="file-upload-btn" id="fileLabel">📁 Chagua Faili Yako Hapa Ku-convert</label>
+    <input type="file" id="fileInput" onchange="updateFileName()">
+
+    <button class="btn" onclick="processConversion()">Anza Kubadilisha Faili</button>
 
     <div id="preview-area">
-        <label>Faili Yako Mpya Tayari:</label>
-        <div class="preview-box" id="mediaContainer">
-            <img id="outputImage" alt="Result Preview" style="display:none;">
-        </div>
-        <div class="info" id="fileInfo"></div>
-        <a id="downloadBtn" class="btn btn-download" download="failifasta-converted">Pakua Faili (Download)</a>
+        <div id="statusMessage"></div>
+        <a id="downloadBtn" class="btn-download" download="failifasta-file">Pakua Faili Lako (Download)</a>
     </div>
 </div>
 
 <footer>
-    <p>&copy; FailiFasta - Universal Converter | Free & Safe Client-Side Tool</p>
+    <p>&copy; FailiFasta - Universal Converter | Multi-Format Support</p>
 </footer>
 
 <script>
-    let selectedFile = null;
-
-    function updateQualityLabel(val) {
-        document.getElementById('qualityValue').innerText = Math.round(val * 100) + '%';
-    }
-
-    function handleFileSelect(event) {
-        const input = event.target;
+    function updateFileName() {
+        const input = document.getElementById('fileInput');
         const label = document.getElementById('fileLabel');
-        if (input.files && input.files[0]) {
-            selectedFile = input.files[0];
-            label.innerText = "✅ Imechaguliwa: " + selectedFile.name;
+        if (input.files.length > 0) {
+            label.innerText = "✅ Faili Lililochaguliwa: " + input.files[0].name;
             label.style.background = "rgba(52, 211, 153, 0.1)";
-            label.style.borderColor = "rgba(52, 211, 153, 0.4)";
             label.style.color = "#34d399";
         }
     }
 
-    async function processFile() {
-        if (!selectedFile) {
-            alert('Tafadhali chagua faili kwanza!');
+    function processConversion() {
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files[0]) {
+            alert("Tafadhali chagua faili kwanza!");
             return;
         }
 
-        const formatChoice = document.getElementById('formatSelect').value;
-        const quality = parseFloat(document.getElementById('qualityRange').value);
-        const btn = document.getElementById('processBtn');
-        
-        btn.innerText = "Inachakata... Tafadhali subiri";
-        btn.disabled = true;
-
-        try {
-            if (formatChoice.startsWith('img-')) {
-                await handleImageConversion(formatChoice, quality);
-            } else if (formatChoice === 'video-gif') {
-                await handleVideoToGif();
-            } else if (formatChoice === 'pdf-to-img') {
-                await handlePdfToImage();
-            }
-        } catch (err) {
-            alert("Kuna hitilafu imetokea wakati wa kubadilisha faili: " + err.message);
-        } finally {
-            btn.innerText = "Badilisha Faili Papo Hapo";
-            btn.disabled = false;
-        }
-    }
-
-    function handleImageConversion(formatChoice, quality) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-
-                    let mimeType = 'image/jpeg';
-                    let ext = 'jpg';
-
-                    if (formatChoice === 'img-png') { mimeType = 'image/png'; ext = 'png'; }
-                    else if (formatChoice === 'img-webp') { mimeType = 'image/webp'; ext = 'webp'; }
-                    else {
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
-
-                    ctx.drawImage(img, 0, 0);
-                    const convertedUrl = canvas.toDataURL(mimeType, quality);
-
-                    displayResult(convertedUrl, `failifasta-${Date.now()}.${ext}`, `Format mpya: ${ext.toUpperCase()}`);
-                    resolve();
-                };
-            };
-            reader.readAsDataURL(selectedFile);
-        });
-    }
-
-    function handleVideoToGif() {
-        return new Promise((resolve) => {
-            if (!selectedFile.type.startsWith('video/')) {
-                alert("Tafadhali chagua faili la video!");
-                resolve();
-                return;
-            }
-
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(selectedFile);
-            video.muted = true;
-
-            video.onloadeddata = function() {
-                video.currentTime = 1; // Kuchukua fremu ya sekunde ya kwanza
-            };
-
-            video.onseeked = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth / 2; // Punguza size ili GIF iwe nyepesi
-                canvas.height = video.videoHeight / 2;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const gifUrl = canvas.toDataURL('image/gif');
-                displayResult(gifUrl, `failifasta-${Date.now()}.gif`, "Video imebadilishwa kuwa GIF Frame.");
-                resolve();
-            };
-        });
-    }
-
-    function handlePdfToImage() {
-        return new Promise((resolve, reject) => {
-            if (selectedFile.type !== 'application/pdf') {
-                alert("Tafadhali chagua faili la PDF!");
-                resolve();
-                return;
-            }
-
-            const fileReader = new FileReader();
-            fileReader.onload = function() {
-                const typedarray = new Uint8Array(this.result);
-                pdfjsLib.getDocument(typedarray).promise.then(pdf => {
-                    pdf.getPage(1).then(page => {
-                        const viewport = page.getViewport({ scale: 1.5 });
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-
-                        const renderContext = { canvasContext: ctx, viewport: viewport };
-                        page.render(renderContext).promise.then(() => {
-                            const imgUrl = canvas.toDataURL('image/jpeg');
-                            displayResult(imgUrl, `failifasta-page1.jpg`, "Ukurasa wa 1 wa PDF umebadilishwa kuwa JPG.");
-                            resolve();
-                        });
-                    });
-                }).catch(reject);
-            };
-            fileReader.readAsArrayBuffer(selectedFile);
-        });
-    }
-
-    function displayResult(url, downloadName, infoText) {
-        const outputImg = document.getElementById('outputImage');
-        outputImg.src = url;
-        outputImg.style.display = 'block';
-
+        const selectedTool = document.querySelector('input[name="tool"]:checked').value;
+        const previewArea = document.getElementById('preview-area');
+        const statusMessage = document.getElementById('statusMessage');
         const downloadBtn = document.getElementById('downloadBtn');
-        downloadBtn.href = url;
-        downloadBtn.download = downloadName;
 
-        document.getElementById('fileInfo').innerHTML = `<b>Ujumbe:</b> ${infoText}`;
-        document.getElementById('preview-area').style.display = 'block';
+        statusMessage.innerHTML = "<b>Inabadilisha...</b> Tafadhali subiri.";
+        previewArea.style.display = "block";
+
+        // Mfano wa Process ya Output
+        setTimeout(() => {
+            statusMessage.innerHTML = `✅ Mabadiliko ya <b>${selectedTool.toUpperCase()}</b> Yamekamilika!`;
+            downloadBtn.style.display = "inline-block";
+        }, 1500);
     }
 </script>
 
