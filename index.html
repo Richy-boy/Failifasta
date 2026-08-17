@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="sw">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FailiFasta - Convert Format Zote za Mafaili</title>
+    <title>FailiFasta - Universal File Converter & Compressor</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
@@ -16,42 +16,45 @@
             --text-muted: #94a3b8;
             --accent-blue: #38bdf8;
             --accent-green: #34d399;
+            --accent-green-hover: #059669;
             --input-bg: #0f172a;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 25px 15px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px 15px; }
         
-        .header { text-align: center; margin-bottom: 30px; }
+        .header { text-align: center; margin-bottom: 25px; }
         .header h1 { color: var(--accent-blue); font-size: 32px; font-weight: 800; }
-        .header p { color: var(--text-muted); font-size: 15px; margin-top: 5px; }
+        .header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
         .main-grid {
-            max-width: 1000px;
-            margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
         }
 
         .category-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
         }
 
         .category-title {
             color: var(--accent-blue);
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 10px;
             border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
+            padding-bottom: 5px;
         }
 
         .tool-option {
@@ -59,166 +62,254 @@
             align-items: center;
             justify-content: space-between;
             background: var(--input-bg);
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid transparent;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 13px;
         }
 
-        .tool-option:hover {
-            border-color: var(--accent-blue);
-        }
+        .tool-option input { accent-color: var(--accent-blue); }
 
-        .tool-option span { font-size: 14px; font-weight: 600; }
-        .tool-option input[type="radio"] { accent-color: var(--accent-blue); }
-
-        .upload-section {
-            max-width: 1000px;
-            margin: 30px auto 0 auto;
+        .action-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 25px;
-            text-align: center;
+            padding: 20px;
         }
 
         input[type="file"] { display: none; }
         .file-upload-btn {
             display: block;
-            padding: 18px;
+            padding: 15px;
             background: rgba(56, 189, 248, 0.08);
             color: var(--accent-blue);
             border: 2px dashed rgba(56, 189, 248, 0.3);
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: 700;
-            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-main);
         }
 
         .btn {
             width: 100%;
             background: var(--accent-blue);
             color: #0f172a;
-            padding: 14px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
         }
 
-        .btn-download {
-            background: var(--accent-green);
-            color: #064e3b;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 15px;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: 700;
+        /* RESULT AREA CLOSE TO ACTION BUTTONS */
+        #preview-area {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--input-bg);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            text-align: center;
         }
 
-        #preview-area { display: none; margin-top: 20px; }
-        img, video { max-width: 100%; border-radius: 8px; margin-top: 10px; }
-        footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 13px; }
+        .btn-download {
+            display: inline-block;
+            background: var(--accent-green);
+            color: #064e3b;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-decoration: none;
+            margin-top: 10px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download:hover { background: var(--accent-green-hover); color: #fff; }
+
+        .file-stats { font-size: 13px; color: var(--text-muted); margin: 10px 0; }
+
+        footer { text-align: center; margin-top: 30px; color: var(--text-muted); font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <h1>FailiFasta 🚀</h1>
-    <p>Zana ya haraka ya kubadilisha aina zote za mafaili (Image, Video, Audio & Documents)</p>
+    <p>Fast & Free File Converter, Resizer, and Compressor</p>
 </div>
 
-<!-- GRID SYSTEM - ZANA ZOTE ZINAONEKANA WAZI -->
-<div class="main-grid">
+<div class="container">
 
-    <!-- Group 1: Picha -->
-    <div class="category-card">
-        <div class="category-title">🖼️ Picha (Image Formats)</div>
-        <label class="tool-option"><span>PNG ➔ JPG / JPEG</span><input type="radio" name="tool" value="img-jpg" checked></label>
-        <label class="tool-option"><span>JPG ➔ PNG</span><input type="radio" name="tool" value="img-png"></label>
-        <label class="tool-option"><span>Image ➔ WEBP</span><input type="radio" name="tool" value="img-webp"></label>
-        <label class="tool-option"><span>Image ➔ BMP / GIF</span><input type="radio" name="tool" value="img-bmp"></label>
-        <label class="tool-option"><span>Picha ➔ PDF</span><input type="radio" name="tool" value="img-to-pdf"></label>
+    <!-- FAST CATEGORY SELECTION -->
+    <div class="main-grid">
+        <div class="category-card">
+            <div class="category-title">🖼️ Images</div>
+            <label class="tool-option"><span>PNG to JPG</span><input type="radio" name="tool" value="img-jpg" checked></label>
+            <label class="tool-option"><span>JPG to PNG</span><input type="radio" name="tool" value="img-png"></label>
+            <label class="tool-option"><span>Convert to WEBP</span><input type="radio" name="tool" value="img-webp"></label>
+            <label class="tool-option"><span>Image to PDF</span><input type="radio" name="tool" value="img-pdf"></label>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">🎬 Video & GIF</div>
+            <label class="tool-option"><span>Video to GIF</span><input type="radio" name="tool" value="video-gif"></label>
+            <label class="tool-option"><span>Extract Audio (MP3)</span><input type="radio" name="tool" value="video-mp3"></label>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">🎵 Audio</div>
+            <label class="tool-option"><span>MP3 / WAV Convert</span><input type="radio" name="tool" value="audio-convert"></label>
+            <label class="tool-option"><span>Audio + Image to MP4</span><input type="radio" name="tool" value="mp3-mp4"></label>
+        </div>
+
+        <div class="category-card">
+            <div class="category-title">📄 Documents</div>
+            <label class="tool-option"><span>PDF to Image (JPG)</span><input type="radio" name="tool" value="pdf-jpg"></label>
+            <label class="tool-option"><span>DOCX to PDF</span><input type="radio" name="tool" value="docx-pdf"></label>
+        </div>
     </div>
 
-    <!-- Group 2: Video -->
-    <div class="category-card">
-        <div class="category-title">🎬 Video & Animations</div>
-        <label class="tool-option"><span>Video ➔ GIF (Animated)</span><input type="radio" name="tool" value="video-gif"></label>
-        <label class="tool-option"><span>Video ➔ MP4 / WEBM</span><input type="radio" name="tool" value="video-mp4"></label>
-        <label class="tool-option"><span>Video ➔ MP3 (Extract Audio)</span><input type="radio" name="tool" value="video-mp3"></label>
+    <!-- MAIN CONVERSION & COMPRESSION CARD -->
+    <div class="action-card">
+        <label for="fileInput" class="file-upload-btn" id="fileLabel">📁 Click Here to Choose File</label>
+        <input type="file" id="fileInput" onchange="loadFile(event)">
+
+        <div class="controls-grid">
+            <div>
+                <label>Quality / Compression (<span id="qualVal">80</span>%)</label>
+                <input type="range" id="qualityRange" min="10" max="100" value="80" oninput="document.getElementById('qualVal').innerText = this.value">
+            </div>
+            <div>
+                <label>Resize Max Width (Pixels - Optional)</label>
+                <input type="number" id="maxWidth" placeholder="e.g. 1080">
+            </div>
+        </div>
+
+        <button class="btn" onclick="convertAndCompress()">Convert & Compress File Now</button>
+
+        <!-- DOWNLOAD AREA (RIGHT BELOW ACTION BUTTON) -->
+        <div id="preview-area">
+            <h3>✅ File Processing Complete!</h3>
+            <div class="file-stats" id="fileStats"></div>
+            <img id="previewImg" style="max-width: 150px; border-radius: 6px; margin: 10px auto; display:none;">
+            <br>
+            <a id="downloadBtn" class="btn-download" href="#" download>⬇️ Download File Now</a>
+        </div>
     </div>
 
-    <!-- Group 3: Audio -->
-    <div class="category-card">
-        <div class="category-title">🎵 Sauti (Audio Formats)</div>
-        <label class="tool-option"><span>MP3 ➔ WAV</span><input type="radio" name="tool" value="audio-wav"></label>
-        <label class="tool-option"><span>WAV / AAC ➔ MP3</span><input type="radio" name="tool" value="audio-mp3"></label>
-        <label class="tool-option"><span>MP3 + Image ➔ MP4 Video</span><input type="radio" name="tool" value="mp3-to-mp4"></label>
-    </div>
-
-    <!-- Group 4: Documents -->
-    <div class="category-card">
-        <div class="category-title">📄 Documents</div>
-        <label class="tool-option"><span>PDF ➔ Picha (JPG)</span><input type="radio" name="tool" value="pdf-to-jpg"></label>
-        <label class="tool-option"><span>DOCX ➔ PDF</span><input type="radio" name="tool" value="docx-to-pdf"></label>
-        <label class="tool-option"><span>PDF ➔ DOCX</span><input type="radio" name="tool" value="pdf-to-docx"></label>
-    </div>
-
-</div>
-
-<!-- SEHEMU YA UPLOAD NA MCHAKATO -->
-<div class="upload-section">
-    <label for="fileInput" class="file-upload-btn" id="fileLabel">📁 Chagua Faili Yako Hapa Ku-convert</label>
-    <input type="file" id="fileInput" onchange="updateFileName()">
-
-    <button class="btn" onclick="processConversion()">Anza Kubadilisha Faili</button>
-
-    <div id="preview-area">
-        <div id="statusMessage"></div>
-        <a id="downloadBtn" class="btn-download" download="failifasta-file">Pakua Faili Lako (Download)</a>
-    </div>
 </div>
 
 <footer>
-    <p>&copy; FailiFasta - Universal Converter | Multi-Format Support</p>
+    <p>&copy; FailiFasta | Universal Client-Side Converter</p>
 </footer>
 
 <script>
-    function updateFileName() {
-        const input = document.getElementById('fileInput');
-        const label = document.getElementById('fileLabel');
-        if (input.files.length > 0) {
-            label.innerText = "✅ Faili Lililochaguliwa: " + input.files[0].name;
-            label.style.background = "rgba(52, 211, 153, 0.1)";
+    let currentLoadedFile = null;
+
+    function loadFile(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            currentLoadedFile = input.files[0];
+            const label = document.getElementById('fileLabel');
+            label.innerText = "✅ Selected: " + currentLoadedFile.name;
+            label.style.borderColor = "#34d399";
             label.style.color = "#34d399";
         }
     }
 
-    function processConversion() {
-        const fileInput = document.getElementById('fileInput');
-        if (!fileInput.files[0]) {
-            alert("Tafadhali chagua faili kwanza!");
+    function convertAndCompress() {
+        if (!currentLoadedFile) {
+            alert("Please choose a file first!");
             return;
         }
 
         const selectedTool = document.querySelector('input[name="tool"]:checked').value;
-        const previewArea = document.getElementById('preview-area');
-        const statusMessage = document.getElementById('statusMessage');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const quality = parseFloat(document.getElementById('qualityRange').value) / 100;
+        const maxWidth = parseInt(document.getElementById('maxWidth').value);
 
-        statusMessage.innerHTML = "<b>Inabadilisha...</b> Tafadhali subiri.";
-        previewArea.style.display = "block";
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
 
-        // Mfano wa Process ya Output
-        setTimeout(() => {
-            statusMessage.innerHTML = `✅ Mabadiliko ya <b>${selectedTool.toUpperCase()}</b> Yamekamilika!`;
-            downloadBtn.style.display = "inline-block";
-        }, 1500);
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Scale image down if Max Width specified
+                if (maxWidth && width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+
+                let formatType = 'image/jpeg';
+                let ext = 'jpg';
+
+                if (selectedTool === 'img-png') { formatType = 'image/png'; ext = 'png'; }
+                else if (selectedTool === 'img-webp') { formatType = 'image/webp'; ext = 'webp'; }
+                else {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL(formatType, quality);
+
+                // Show download link and bind file directly
+                const downloadBtn = document.getElementById('downloadBtn');
+                downloadBtn.href = dataUrl;
+                downloadBtn.download = `failifasta-${Date.now()}.${ext}`;
+
+                // Preview & Stats
+                const previewImg = document.getElementById('previewImg');
+                previewImg.src = dataUrl;
+                previewImg.style.display = 'block';
+
+                const origSize = (currentLoadedFile.size / 1024).toFixed(1);
+                const head = 'data:' + formatType + ';base64,';
+                const newSize = ((dataUrl.length - head.length) * 3 / 4 / 1024).toFixed(1);
+
+                document.getElementById('fileStats').innerHTML = 
+                    `Original Size: <b>${origSize} KB</b> | New Compressed Size: <b>${newSize} KB</b><br>` +
+                    `Dimensions: <b>${width} x ${height} px</b>`;
+
+                document.getElementById('preview-area').style.display = 'block';
+            }
+        };
+
+        if (currentLoadedFile.type.startsWith('image/')) {
+            reader.readAsDataURL(currentLoadedFile);
+        } else {
+            alert("Selected feature processes image-based tools directly inside browser.");
+        }
     }
 </script>
 
