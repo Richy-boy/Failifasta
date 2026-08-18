@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FailiFasta - Universal Converter & Compressor</title>
+    
+    <!-- Libraries for PDF and DOCX processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --border-glow: #38bdf8;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background: var(--bg-dark); 
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 15px;
+        }
+
+        .app-header { text-align: center; margin-bottom: 30px; }
+        .app-header h1 { 
+            font-size: 38px; 
+            font-weight: 900; 
+            background: linear-gradient(135deg, #38bdf8, #818cf8); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .app-header p { color: var(--text-sub); font-size: 14px; margin-top: 6px; }
+
+        .workspace {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tools-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .tool-btn {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .tool-btn:hover, .tool-btn.active {
+            border-color: var(--border-glow);
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--border-glow);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(56, 189, 248, 0.4);
+            background: var(--panel-bg);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .drop-zone:hover {
+            border-color: var(--border-glow);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .drop-zone-text { font-size: 16px; font-weight: 600; color: var(--border-glow); }
+        .drop-zone-sub { font-size: 12px; color: var(--text-sub); margin-top: 5px; }
+
+        .settings-panel {
+            display: flex;
+            gap: 20px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .setting-box { flex: 1; }
+        .setting-box label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 8px; font-weight: 600; }
+        .setting-box input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            color: #fff;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .result-panel {
+            display: none;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-green);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: var(--accent-green);
+            color: #022c22;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 800;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent-red);
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+            text-decoration: underline;
+        }
+
+        footer { margin-top: auto; padding-top: 40px; color: var(--text-sub); font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="app-header">
+    <h1>FailiFasta 🚀</h1>
+    <p>Fast Client-Side File Converter & Compressor</p>
+</div>
+
+<div class="workspace">
+
+    <!-- Tool Selector Options -->
+    <div class="tools-selector">
+        <div class="tool-btn active" data-tool="docx-pdf">📄 DOCX to PDF</div>
+        <div class="tool-btn" data-tool="img-pdf">🖼️ Image to PDF</div>
+        <div class="tool-btn" data-tool="img-jpg">PNG to JPG</div>
+        <div class="tool-btn" data-tool="img-png">JPG to PNG</div>
+        <div class="tool-btn" data-tool="img-webp">Convert to WEBP</div>
+    </div>
+
+    <!-- Drag & Drop Area -->
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-zone-text" id="dropZoneText">📁 Click or Drag File Here</div>
+        <div class="drop-zone-sub" id="acceptText">Accepts .docx files</div>
+        <input type="file" id="fileInput" style="display:none;" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Custom Controls -->
+    <div class="settings-panel">
+        <div class="setting-box">
+            <label>Quality / Compression (<span id="qualVal">80</span>%)</label>
+            <input type="range" id="qualityRange" min="10" max="100" value="80" oninput="document.getElementById('qualVal').innerText = this.value">
+        </div>
+        <div class="setting-box">
+            <label>Max Image Width (Px Optional)</label>
+            <input type="number" id="maxWidth" placeholder="e.g. 1080">
+        </div>
+    </div>
+
+    <!-- Process Action -->
+    <button class="action-btn" onclick="processFile()">Convert File Now</button>
+
+    <!-- Result Display -->
+    <div class="result-panel" id="resultPanel">
+        <h3 style="color: var(--accent-green);">✅ File Converted Successfully!</h3>
+        <p id="fileStats" style="font-size: 13px; color: var(--text-sub); margin-top: 8px;"></p>
+        <a id="downloadLink" class="download-btn" href="#">⬇️ Download Converted File</a>
+        <br>
+        <button class="reset-btn" onclick="resetApp()">Convert Another File</button>
+    </div>
+
+</div>
+
+<footer>
+    &copy; FailiFasta | Client-Side Secure File Processing
+</footer>
+
+<script>
+    let selectedTool = 'docx-pdf';
+    let loadedFile = null;
+
+    // Tool switching logic
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            selectedTool = this.getAttribute('data-tool');
+            
+            const fileInput = document.getElementById('fileInput');
+            const acceptText = document.getElementById('acceptText');
+
+            if (selectedTool === 'docx-pdf') {
+                fileInput.accept = ".docx";
+                acceptText.innerText = "Accepts .docx files";
+            } else {
+                fileInput.accept = "image/*";
+                acceptText.innerText = "Accepts PNG, JPG, WEBP images";
+            }
+            resetApp();
+        });
+    });
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            loadedFile = file;
+            document.getElementById('dropZoneText').innerText = "✅ File Selected: " + file.name;
+        }
+    }
+
+    async function processFile() {
+        if (!loadedFile) {
+            alert("Please select a file first!");
+            return;
+        }
+
+        const quality = parseFloat(document.getElementById('qualityRange').value) / 100;
+        const maxWidth = parseInt(document.getElementById('maxWidth').value);
+
+        if (selectedTool === 'docx-pdf') {
+            await convertDocxToPdf(loadedFile);
+        } else if (selectedTool === 'img-pdf') {
+            convertImageToPdf(loadedFile);
+        } else {
+            convertImageFormat(loadedFile, quality, maxWidth);
+        }
+    }
+
+    // DOCX TO PDF CONVERTER LOGIC
+    async function convertDocxToPdf(file) {
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+            const textContent = result.value;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const splitText = doc.splitTextToSize(textContent, 180);
+            let y = 15;
+
+            for (let i = 0; i < splitText.length; i++) {
+                if (y > 280) {
+                    doc.addPage();
+                    y = 15;
+                }
+                doc.text(splitText[i], 10, y);
+                y += 7;
+            }
+
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            showDownload(pdfUrl, `failifasta-${Date.now()}.pdf`, `Docx Text Extracted & Converted to PDF`);
+        } catch (err) {
+            alert("Error processing DOCX file: " + err.message);
+        }
+    }
+
+    // IMAGE TO PDF
+    function convertImageToPdf(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: img.width > img.height ? 'landscape' : 'portrait',
+                    unit: 'px',
+                    format: [img.width, img.height]
+                });
+                doc.addImage(img.src, 'JPEG', 0, 0, img.width, img.height);
+                const pdfUrl = doc.output('bloburl');
+                showDownload(pdfUrl, `failifasta-${Date.now()}.pdf`, `Image successfully wrapped into PDF`);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // IMAGE FORMAT CONVERTER
+    function convertImageFormat(file, quality, maxWidth) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                let width = img.width;
+                let height = img.height;
+
+                if (maxWidth && width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                let mimeType = 'image/jpeg';
+                let ext = 'jpg';
+                if (selectedTool === 'img-png') { mimeType = 'image/png'; ext = 'png'; }
+                if (selectedTool === 'img-webp') { mimeType = 'image/webp'; ext = 'webp'; }
+
+                if (mimeType === 'image/jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, width, height);
+                }
+
+                ctx.drawImage(img, 0, 0, width, height);
+                const dataUrl = canvas.toDataURL(mimeType, quality);
+                showDownload(dataUrl, `failifasta-${Date.now()}.${ext}`, `Resized: ${width}x${height}px`);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function showDownload(url, filename, stats) {
+        const link = document.getElementById('downloadLink');
+        link.href = url;
+        link.download = filename;
+        document.getElementById('fileStats').innerText = stats;
+        document.getElementById('resultPanel').style.display = 'block';
+    }
+
+    function resetApp() {
+        loadedFile = null;
+        document.getElementById('fileInput').value = '';
+        document.getElementById('dropZoneText').innerText = "📁 Click or Drag File Here";
+        document.getElementById('resultPanel').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
