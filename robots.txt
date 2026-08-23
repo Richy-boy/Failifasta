@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-sitemap: https://failifasta.pages.dev
+Sitemap: https://failifasta.pages.dev/sitemap.xml
